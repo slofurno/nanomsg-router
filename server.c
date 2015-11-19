@@ -43,10 +43,9 @@ coroutine void collect(chan workers, int back_router)
         hdr.msg_control = ctrl;
         hdr.msg_controllen = 64;
 
-        printf("waiting for worker to report in..\n");
         fdwait(ready, FDW_IN, -1);
         int rc = nn_recvmsg(back_router, &hdr, NN_DONTWAIT);
-        printf("got msg: %.*s\n", hdr.msg_iov->iov_len, (char*) hdr.msg_iov->iov_base);
+        printf("%.*s\n", hdr.msg_iov->iov_len, (char*) hdr.msg_iov->iov_base);
         chs(workers, char*, ctrl); 
     }
 
@@ -72,10 +71,8 @@ coroutine void route_work(chan workers, int back_router, chan jobs)
 {
     while(1){
 
-        msleep(now() + 4000);
-        printf("i've got work to do\n");
-
         char *buf = chr(jobs, char*);
+        printf("do i have a worker for my work??\n");
         char *worker_header = chr(workers, char*);
 
         printf("i've got a worker available\n");
@@ -83,7 +80,7 @@ coroutine void route_work(chan workers, int back_router, chan jobs)
         hdr.msg_control = worker_header;
         hdr.msg_controllen = 64;
 
-        printf("sending msg: %s w/ len %d\n", buf, strlen(buf));
+//        printf("sending msg: %s w/ len %d\n", buf, strlen(buf));
         struct nn_iovec iovec;
         iovec.iov_base = buf;
         iovec.iov_len = strlen(buf);
@@ -107,7 +104,9 @@ int main()
 
     go(collect(workers, back_router));
     go(generate_work(jobs));
-    route_work(workers, back_router, jobs); 
+    go(route_work(workers, back_router, jobs)); 
+
+    msleep(now() + 5435345);
     
     int front_router = nn_socket(AF_SP_RAW, NN_REP);
     nn_bind(front_router, FRONTROUTER);

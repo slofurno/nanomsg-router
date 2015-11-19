@@ -15,13 +15,18 @@ int main(const int argc, const char **argv)
     char msg [100];
     char *buf = "ready for work";
     sprintf(msg, "%s says ready for work", argv[1]);
-        printf("%s sending msg to server\n", argv[1]);
+    int i = 0;
+    while(++i < 5){
+        printf("%s\n",msg);
         nn_send(request,msg,strlen(msg),0);
 
         int n = nn_recv(request,&buf,NN_MSG,0);
-        printf("got response %.*s\n", n, buf);
+        printf("%s got response %.*s\n", argv[1], n, buf);
 
         nn_freemsg(buf);
+        sleep(1);
+    }
+    printf("%s is quitting\n", argv[1]);
     nn_shutdown(request,0);
     return 0;
 }
