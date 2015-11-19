@@ -1,0 +1,8 @@
+*
+!*.*
+!*/
+!makefile
+*.exe
+*.swp
+*.o
+tmp/
